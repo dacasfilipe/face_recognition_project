@@ -11,6 +11,11 @@
 # PARA PERSONALIZAR, DÊ UMA OLHADA NA FUNÇÃO "key()" NO FINAL DO CÓDIGO
 # "LEIA AS INSTRUÇÕES NO GITHUB ANTES DE USAR O PROGRAMA (EM PORTUGUÊS)"
 # ------------------------------------------------------------------------------------------------------------
+#   IMPLEMENTAÇÕES FUTURAS:
+# chamada com reconhecimento facial
+#https://github.com/Alisson-tech/Chamada_Escolar_com_Reconhecimento_Facial
+#----------------------------------------------------------------------------
+# PRÓXIMOS ITENS A ADICIONAR NO PROJETO
 
 # importa as bibliotecas necessárias
 import cv2
