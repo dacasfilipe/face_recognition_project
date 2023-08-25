@@ -7,7 +7,6 @@
 # Feito por Davicjc por meio de pesquisas, estudos de bibliotecas e análise de códigos de terceiros.
 # ------------------------------------------------------------------------------------------------------------
 
-
 # ------------------------------------------------------------------------------------------------------------
 # PARA PERSONALIZAR, DÊ UMA OLHADA NA FUNÇÃO "key()" NO FINAL DO CÓDIGO
 # "LEIA AS INSTRUÇÕES NO GITHUB ANTES DE USAR O PROGRAMA (EM PORTUGUÊS)"
@@ -20,13 +19,41 @@ import random
 import numpy as np
 import glob
 import face_recognition
-import tkinter as tk
 import webbrowser
 from pathlib import Path
 import time
+import tkinter as tk
+import random
+import mysql.connector
+
+# Configuração da conexão com o banco de dados
+config = {
+    'user': 'root',  # Substitua 'username' pelo nome de usuário do MySQL
+    'password': 'root',  # Substitua 'password' pela senha do MySQL
+    'host': 'localhost',
+    'database': 'teste_face',  # Substitua 'nome_do_banco' pelo nome do seu banco de dados
+    'raise_on_warnings': True
+}
 
 
-#1 Função que cria a janela principal
+# função para inserir os dados do usuário na tabela do banco de dados
+def insert_into_database(name, email, phone, folder_image):
+    # Conecta ao banco de dados
+    connection = mysql.connector.connect(**config)
+    cursor = connection.cursor()
+
+    # Insere os dados na tabela (Substitua 'nome_da_tabela' pelo nome da sua tabela)
+    query = "INSERT INTO users (name, email, phone, folder_image) VALUES (%s, %s, %s, %s)"
+    cursor.execute(query, (name, email, phone, folder_image))
+
+    # Encerra a conexão+
+    connection.commit()
+    cursor.close()
+    connection.close()
+
+
+
+# 1 Função que cria a janela principal
 
 def lobby():
     try:
@@ -49,13 +76,14 @@ def lobby():
         txt_label = tk.Label(lobby_tk, text="Bem vindo ao Face Safety,\no que deseja fazer?", font=(
             "Arial", 18), bg="black", fg="white")
         Badd_button = tk.Button(lobby_tk, text="Adicionar Pessoa", font=(
-            "Arial Black", 10), bg="black", fg="blue", cursor="hand2", command=nome)
+            # aqui chama a função de cadastro
+            "Arial Black", 10), bg="black", fg="white", cursor="hand2", command=capture_name)
         Bremv_button = tk.Button(lobby_tk, text="Remover Pessoa", font=(
             "Arial Black", 10), bg="black", fg="red", cursor="hand2", command=apagar_imagem)
         Scan_button = tk.Button(lobby_tk, text="Ligar Scanner", font=(
             "Arial Black", 10), bg="black", fg="green", cursor="hand2", command=reconhecer)
         Addadm_button = tk.Button(lobby_tk, text="+ Adm", font=(
-            "Arial Black", 10), bg="black", fg="blue", cursor="hand2", command=admadd)
+            "Arial Black", 10), bg="black", fg="white", cursor="hand2", command=admadd)
         Rmva_button = tk.Button(lobby_tk, text="- Adm", font=(
             "Arial Black", 10), bg="black", fg="red", cursor="hand2", command=admrvm)
         cjc_label = tk.Label(lobby_tk, text="By: Davicjc", font=(
@@ -83,6 +111,7 @@ def lobby():
     except:
         def close():
             error.destroy()
+
         print("Ocorreu um erro 'code-1'")
         error = tk.Tk()
         error.resizable(width=False, height=False)
@@ -101,8 +130,82 @@ def lobby():
         error.mainloop()
 
 
-#2 Função que captura o nome da pessoa
+# 2 Função modificada que capturas os dados do usuário e salva no banco de dados.
+def capture_name():
+    try:
+        name_window = tk.Tk()
+        name_window.resizable(width=False, height=False)
+        name_window.title("Seu Nome:")
+        name_window.geometry("290x420")
+        name_window.configure(background="black")
 
+        def clear():
+            name = nm_entry.get()
+            email = email_entry.get()
+            phone = phone_entry.get()
+            if name == "":
+                #adicionar tratamento para "Não inseriu nome"
+                name = "NoName " + str(random.randint(1, 1000)) + ".jpg"
+            else:
+                name = name + "_" + str(random.randint(1, 1000)) + ".jpg"
+            name_window.destroy()
+            nova_imagem(name, email, phone)
+
+
+
+        # Componentes da janela
+        nm_label = tk.Label(name_window, text="Nome:", bg="black", fg="white")
+        nm_entry = tk.Entry(name_window, width=40)
+
+        email_label = tk.Label(name_window, text="Email:", bg="black", fg="white")
+        email_entry = tk.Entry(name_window, width=40)
+
+        phone_label = tk.Label(name_window, text="Telefone:", bg="black", fg="white")
+        phone_entry = tk.Entry(name_window, width=40)
+
+        nm_button = tk.Button(name_window, text="OK", font=("Arial", 9), bg="black", fg="white", cursor="hand2",
+                              command=clear)
+
+        # Posicionando os componentes
+        nm_label.place(x=5, y=5)
+        nm_entry.place(x=5, y=25)
+
+        email_label.place(x=5, y=55)
+        email_entry.place(x=5, y=75)
+
+        phone_label.place(x=5, y=105)
+        phone_entry.place(x=5, y=125)
+
+        nm_button.place(x=260, y=5)
+
+        name_window.mainloop()
+
+        # Caso ocorra algum erro, exibe uma mensagem de erro
+    except:
+
+        def close():
+            error.destroy()
+
+        print("Ocorreu um erro 'code-2'")
+        error = tk.Tk()
+        error.resizable(width=False, height=False)
+        error.title("Erro 2")
+        error.geometry("320x180")
+        error.configure(background="red")
+        error_label = tk.Label(error, text="Erro em:\nNome '2'", font=(
+            "Arial", 30), bg="red", fg="black")
+        error_label.pack()
+        botao = tk.Button(error, text="OK", font=(
+            "Arial Black", 10), bg="red", fg="black", cursor="hand2", command=close)
+        botao.place(x=10, y=140)
+        dica_label = tk.Label(error, text="Erro em: Capturar o nome da pessoa\nDica: Nome invalido ou ERRO!", font=(
+            "Arial", 10), bg="red", fg="black")
+        dica_label.place(x=10, y=100)
+        error.mainloop()
+
+
+# 2 Função que captura o nome da pessoa
+'''
 def nome():
     try:
         # Cria uma janela
@@ -164,12 +267,12 @@ def nome():
         dica_label = tk.Label(error, text="Erro em: Capturar o nome da pessoa\nDica: Nome invalido ou ERRO!", font=(
             "Arial", 10), bg="red", fg="black")
         dica_label.place(x=10, y=100)
-        error.mainloop()
+        error.mainloop() '''
 
 
-#3 Função que captura a imagem da câmera com o nome da pessoa
+# 3 Função que captura a imagem da câmera com o nome da pessoa
 
-def nova_imagem(name):
+def nova_imagem(name, email, phone):
     try:
         # Define o nome da pasta onde as fotos serão salvas
         folder_name = "Fotos Data 'Face Safety'"
@@ -196,11 +299,14 @@ def nova_imagem(name):
         # Salva a imagem capturada na pasta criada
         file_path = os.path.join(folder_path, name)
         cv2.imwrite(file_path, frame)
-
+        #filipe colocou chama função insert no banco
+        insert_into_database(name, email, phone, file_path)
+        #teste
         # Mostra o nome da pessoa salvo
         def nameinfo():
             def fechar():
                 nameinfo.destroy()
+
             cap.release()
             cv2.destroyAllWindows()
             nameinfo = tk.Tk()
@@ -218,10 +324,13 @@ def nova_imagem(name):
 
         nameinfo()
 
+
+
     # Caso ocorra algum erro, exibe uma mensagem de erro
     except:
         def close():
             error.destroy()
+
         print("Ocorreu um erro 'code-3'")
         error = tk.Tk()
         error.resizable(width=False, height=False)
@@ -234,13 +343,14 @@ def nova_imagem(name):
         botao = tk.Button(error, text="OK", font=(
             "Arial Black", 10), bg="red", fg="black", cursor="hand2", command=close)
         botao.place(x=10, y=140)
-        dica_label = tk.Label(error, text="Erro em: Captura a imagem da câmera\nDica: Erro camera/Procure ajuda!", font=(
-            "Arial", 10), bg="red", fg="black")
+        dica_label = tk.Label(error, text="Erro em: Captura a imagem da câmera\nDica: Erro camera/Procure ajuda!",
+                              font=(
+                                  "Arial", 10), bg="red", fg="black")
         dica_label.place(x=10, y=100)
         error.mainloop()
 
 
-#4 Tira um nome da lista de ADM
+# 4 Tira um nome da lista de ADM
 
 def admrvm():
     try:
@@ -289,7 +399,7 @@ def admrvm():
 
             else:
                 # Define o caminho da pasta "Fotos Data 'Face Safety'" na área de trabalho
-                pasta = os.path.join(str(Path.home()), "Desktop","ADM Data 'Face Safety'")
+                pasta = os.path.join(str(Path.home()), "Desktop", "ADM Data 'Face Safety'")
 
                 # Define o caminho completo do arquivo "AMDs.txt" dentro da pasta
                 arquivo = os.path.join(pasta, "AMDs.txt")
@@ -308,7 +418,7 @@ def admrvm():
 
                 # Remove o nome da lista
                 linhas = [linha.strip()
-                        for linha in linhas if linha.strip() != get]
+                          for linha in linhas if linha.strip() != get]
 
                 # Junta as linhas em uma string novamente
                 conteudo = "\n".join(linhas)
@@ -351,6 +461,7 @@ def admrvm():
     except:
         def close():
             error.destroy()
+
         print("Ocorreu um erro 'code-4'")
         error = tk.Tk()
         error.resizable(width=False, height=False)
@@ -363,13 +474,15 @@ def admrvm():
         botao = tk.Button(error, text="OK", font=(
             "Arial Black", 10), bg="red", fg="black", cursor="hand2", command=close)
         botao.place(x=10, y=140)
-        dica_label = tk.Label(error, text="Houve em: Tira um nome da lista de ADM\nDica: Pode ser que não haja ADMs cadastrados!", font=(
-            "Arial", 10), bg="red", fg="black")
+        dica_label = tk.Label(error,
+                              text="Houve em: Tira um nome da lista de ADM\nDica: Pode ser que não haja ADMs cadastrados!",
+                              font=(
+                                  "Arial", 10), bg="red", fg="black")
         dica_label.place(x=10, y=100)
         error.mainloop()
 
 
-#5 Coloca um nome na lista de ADM
+# 5 Coloca um nome na lista de ADM
 
 def admadd():
     try:
@@ -418,7 +531,7 @@ def admadd():
 
             else:
                 # Define o caminho da pasta "Fotos Data 'Face Safety'" na área de trabalho
-                pasta = os.path.join(str(Path.home()), "Desktop","ADM Data 'Face Safety'")
+                pasta = os.path.join(str(Path.home()), "Desktop", "ADM Data 'Face Safety'")
 
                 # Cria a pasta se ela ainda não existir
                 if not os.path.exists(pasta):
@@ -505,6 +618,7 @@ def admadd():
     except:
         def close():
             error.destroy()
+
         print("Ocorreu um erro 'code-5'")
         error = tk.Tk()
         error.resizable(width=False, height=False)
@@ -517,13 +631,15 @@ def admadd():
         botao = tk.Button(error, text="OK", font=(
             "Arial Black", 10), bg="red", fg="black", cursor="hand2", command=close)
         botao.place(x=10, y=140)
-        dica_label = tk.Label(error, text="Erro em: Colocar um nome na lista de ADM\nDica: Pode ser que não haja pessoas cadastradas!", font=(
-            "Arial", 10), bg="red", fg="black")
+        dica_label = tk.Label(error,
+                              text="Erro em: Colocar um nome na lista de ADM\nDica: Pode ser que não haja pessoas cadastradas!",
+                              font=(
+                                  "Arial", 10), bg="red", fg="black")
         dica_label.place(x=10, y=100)
         error.mainloop()
 
 
-#6 Função que apaga a imagem da pessoa
+# 6 Função que apaga a imagem da pessoa
 
 def apagar_imagem():
     try:
@@ -601,6 +717,7 @@ def apagar_imagem():
     except:
         def close():
             error.destroy()
+
         print("Ocorreu um erro 'code-6'")
         error = tk.Tk()
         error.resizable(width=False, height=False)
@@ -613,14 +730,15 @@ def apagar_imagem():
         botao = tk.Button(error, text="OK", font=(
             "Arial Black", 10), bg="red", fg="black", cursor="hand2", command=close)
         botao.place(x=10, y=140)
-        dica_label = tk.Label(error, text="Erro em: Apagar a imagem da pessoa\nDica: Pode ser que não haja pessoas cadastradas!", font=(
-            "Arial", 10), bg="red", fg="black")
+        dica_label = tk.Label(error,
+                              text="Erro em: Apagar a imagem da pessoa\nDica: Pode ser que não haja pessoas cadastradas!",
+                              font=(
+                                  "Arial", 10), bg="red", fg="black")
         dica_label.place(x=10, y=100)
         error.mainloop()
 
 
-#7 Função que reconhece a pessoa
-
+# 7 Função que reconhece a pessoa
 def reconhecer():
     try:
         # Obtém o caminho para a área de trabalho do usuário atual
@@ -664,6 +782,7 @@ def reconhecer():
     except:
         def close():
             error.destroy()
+
         print("Ocorreu um erro 'code-7'")
         error = tk.Tk()
         error.resizable(width=False, height=False)
@@ -676,13 +795,15 @@ def reconhecer():
         botao = tk.Button(error, text="OK", font=(
             "Arial Black", 10), bg="red", fg="black", cursor="hand2", command=close)
         botao.place(x=10, y=140)
-        dica_label = tk.Label(error, text="Erro em: Reconhece a pessoa\nDica: Veja se há cadastros/alguma foto desfocada!", font=(
-            "Arial", 10), bg="red", fg="black")
+        dica_label = tk.Label(error,
+                              text="Erro em: Reconhece a pessoa\nDica: Veja se há cadastros/alguma foto desfocada!",
+                              font=(
+                                  "Arial", 10), bg="red", fg="black")
         dica_label.place(x=10, y=100)
         error.mainloop()
 
 
-#8 Função que reconhece a pessoa dentro de uma pasta
+# 8 Função que reconhece a pessoa dentro de uma pasta
 
 class PastaOrganizador:
     try:
@@ -707,7 +828,6 @@ class PastaOrganizador:
 
             # Loop pelas imagens encontradas
             for img_path in images_path:
-
                 # Lê a imagem usando a biblioteca cv2
                 img = cv2.imread(img_path)
 
@@ -773,7 +893,7 @@ class PastaOrganizador:
                 def loopvf():
                     try:
                         pasta = os.path.join(str(Path.home()), "Desktop",
-                                        "ADM Data 'Face Safety'")
+                                             "ADM Data 'Face Safety'")
 
                         if not os.path.exists(pasta):
                             os.makedirs(pasta)
@@ -800,8 +920,8 @@ class PastaOrganizador:
         pass
 
 
-#___________________________________________________________________________
-#9 Função que libera ou tranca o acesso, "Personalize ela como quiser"
+# ___________________________________________________________________________
+# 9 Função que libera ou tranca o acesso, "Personalize ela como quiser"
 # Caso não saiba o que está fazendo, não altere nada fora da função "key()"
 
 def key():
@@ -816,39 +936,40 @@ def key():
     # No primeiro "pass", você pode colocar o código para liberar o acesso.
     # No segundo "pass", você pode colocar o código para encerrar o acesso.
     # Caso seu comando seja apenas um, pode deixar o segundo "pass" sem alteração e modificar apenas o primeiro.
-        # Se sua tranca for eletrica e só precisa de um comando para abrir,
-        # você pode colocar o código para liberar o acesso no primeiro "pass" e deixar o segundo "pass" sem alteração.
+    # Se sua tranca for eletrica e só precisa de um comando para abrir,
+    # você pode colocar o código para liberar o acesso no primeiro "pass" e deixar o segundo "pass" sem alteração.
     # Se quiser remover o tempo de espera de 5 segundos, basta remover o "time.sleep(5)" ou colocar um "#" na frente.
     # Para modificar o tempo de espera, basta alterar o valor dentro do "time.sleep()".
     # O tempo de espera é em segundos, sendo assim, ele executará o primeiro "pass" e depois de 5 segundos executará o segundo "pass".
-        # Lembrando que 5 segundos é o tempo padrão. Caso queira alterar o tempo de espera, altere o valor dentro do "time.sleep()".
+    # Lembrando que 5 segundos é o tempo padrão. Caso queira alterar o tempo de espera, altere o valor dentro do "time.sleep()".
     # Este código é apenas um exemplo. Você pode alterá-lo como quiser. No entanto, caso não saiba o que está fazendo,
-        # não altere nada fora da função "key()", pois isso pode causar erros no programa.
-        # No máximo, adicione novas bibliotecas para melhor compatibilidade com seu dispositivo, por exemplo, "Raspberry Pi".
+    # não altere nada fora da função "key()", pois isso pode causar erros no programa.
+    # No máximo, adicione novas bibliotecas para melhor compatibilidade com seu dispositivo, por exemplo, "Raspberry Pi".
     # O texto dentro do "print()" é apenas para informar o que está acontecendo. Você pode alterá-lo ou removê-lo como quiser.
-    #________________________________________________________________________________________________________________
+    # ________________________________________________________________________________________________________________
 
     try:
         print("Acesso permitido por 5 segundos e\nO programa será conjelado nesse meio tempo por segurança")
         # Coloque no lugar de "pass" seu codigo para liberar o acesso "como abrir uma tranca"
-    #___________________________________________________________________________________________________________________________
+        # ___________________________________________________________________________________________________________________________
         pass
-        #___________________________________________________________________________________________________________________________
+        # ___________________________________________________________________________________________________________________________
 
         time.sleep(5)
 
         print("Acesso expirado após 5 segundos de liberação")
         # Coloque no lugar de "pass" seu codigo de encerrar o acesso "como fechar uma tranca"
-        #___________________________________________________________________________________________________________________________
+        # ___________________________________________________________________________________________________________________________
         pass
-        #___________________________________________________________________________________________________________________________
-    #___________________________________________________________________________________________________________________________
-    #PARTE NAO EDITAVEL DO CODIGO, NAO ALTERE NADA ABAIXO
+        # ___________________________________________________________________________________________________________________________
+    # ___________________________________________________________________________________________________________________________
+    # PARTE NAO EDITAVEL DO CODIGO, NAO ALTERE NADA ABAIXO
     # V V V V V V V V V V V V V V V V V V V V V V V V V
 
     except:
         def close():
             error.destroy()
+
         print("Ocorreu um erro 'code-9'")
         error = tk.Tk()
         error.resizable(width=False, height=False)
@@ -865,8 +986,9 @@ def key():
             "Arial", 10), bg="red", fg="black")
         dica_label.place(x=10, y=100)
         error.mainloop()
-#___________________________________________________________________________
+
+
+# ___________________________________________________________________________
 
 
 lobby()
-
