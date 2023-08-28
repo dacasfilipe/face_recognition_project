@@ -16,6 +16,10 @@
 #https://github.com/Alisson-tech/Chamada_Escolar_com_Reconhecimento_Facial
 #----------------------------------------------------------------------------
 # PRÓXIMOS ITENS A ADICIONAR NO PROJETO
+# Disponibilizar a API de acesso ao banco de dados
+# fazer método e rota para disponibilizar logs para aplicação de gestão
+# Desenvolver logins de acesso a usuários.
+
 
 # importa as bibliotecas necessárias
 import cv2
@@ -36,7 +40,7 @@ config = {
     'user': 'root',  # Substitua 'username' pelo nome de usuário do MySQL
     'password': 'root',  # Substitua 'password' pela senha do MySQL
     'host': 'localhost',
-    'database': 'teste_face',  # Substitua 'nome_do_banco' pelo nome do seu banco de dados
+    'database': 'face_safety',  # Substitua 'nome_do_banco' pelo nome do seu banco de dados
     'raise_on_warnings': True
 }
 
@@ -48,9 +52,9 @@ def insert_into_database(name, email, phone, folder_image):
     cursor = connection.cursor()
 
     # Insere os dados na tabela (Substitua 'nome_da_tabela' pelo nome da sua tabela)
-    query = "INSERT INTO users (name, email, phone, folder_image) VALUES (%s, %s, %s, %s)"
+    query = "INSERT INTO pessoa (name, cpf, data_nascimento, folder_image) VALUES (%s, %s, %s, %s)"
     cursor.execute(query, (name, email, phone, folder_image))
-
+    #"INSERT INTO log (name, email, phone, folder_image) VALUES (%s, %s, %s, %s)"
     # Encerra a conexão+
     connection.commit()
     cursor.close()
@@ -72,7 +76,7 @@ def lobby():
         lobby_tk.title("FACE SAFETY")
 
         # Define o tamanho da janela
-        lobby_tk.geometry("320x240")
+        lobby_tk.geometry("620x540")
 
         # Define a cor de fundo da janela
         lobby_tk.configure(background="black")
@@ -91,8 +95,8 @@ def lobby():
             "Arial Black", 10), bg="black", fg="white", cursor="hand2", command=admadd)
         Rmva_button = tk.Button(lobby_tk, text="- Adm", font=(
             "Arial Black", 10), bg="black", fg="red", cursor="hand2", command=admrvm)
-        cjc_label = tk.Label(lobby_tk, text="By: Davicjc", font=(
-            "arial", 8), bg="black", fg="blue", cursor="hand2")
+        #cjc_label = tk.Label(lobby_tk, text="By: Davicjc", font=(
+        #    "arial", 8), bg="black", fg="blue", cursor="hand2")
 
         # Posiciona os componentes na janela
         txt_label.pack()
@@ -101,14 +105,14 @@ def lobby():
         Scan_button.place(x=10, y=200)
         Addadm_button.place(x=200, y=100)
         Rmva_button.place(x=200, y=150)
-        cjc_label.place(x=255, y=220)
-
+        #cjc_label.place(x=255, y=220)
+        '''
         # Serve para chamar a função "Davi" quando o botão for clicado
         cjc_label.bind("<Button-1>", lambda event: Davi())
 
         def Davi():
             webbrowser.open("https://github.com/Davicjc/")
-
+        '''
         # Loop da janela
         lobby_tk.mainloop()
 
@@ -162,10 +166,10 @@ def capture_name():
         nm_label = tk.Label(name_window, text="Nome:", bg="black", fg="white")
         nm_entry = tk.Entry(name_window, width=40)
 
-        email_label = tk.Label(name_window, text="Email:", bg="black", fg="white")
+        email_label = tk.Label(name_window, text="CPF:", bg="black", fg="white")
         email_entry = tk.Entry(name_window, width=40)
 
-        phone_label = tk.Label(name_window, text="Telefone:", bg="black", fg="white")
+        phone_label = tk.Label(name_window, text="Data de Nascimento:", bg="black", fg="white")
         phone_entry = tk.Entry(name_window, width=40)
 
         nm_button = tk.Button(name_window, text="OK", font=("Arial", 9), bg="black", fg="white", cursor="hand2",
