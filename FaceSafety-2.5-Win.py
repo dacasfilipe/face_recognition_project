@@ -183,10 +183,7 @@ def capture_name():
         datanascimento_label = tk.Label(name_window, text="Data de Nascimento:", bg="black", fg="white")
         datanascimento_entry = DateEntry(name_window, width=12, background='darkblue', foreground='white',
                                          borderwidth=2, date_pattern='dd/mm/yyyy')
-        '''
-        datanascimento_label = tk.Label(name_window, text="Data de Nascimento:", bg="black", fg="white")
-        datanascimento_entry = tk.Entry(name_window, width=40)
-        '''
+        
         tipo_label = tk.Label(name_window, text="Tipo:", bg="black", fg="white")
         tipo_entry = tk.Entry(name_window, width=40)
 
