@@ -13,13 +13,12 @@
 # ------------------------------------------------------------------------------------------------------------
 #   IMPLEMENTAÇÕES FUTURAS:
 # chamada com reconhecimento facial
-#https://github.com/Alisson-tech/Chamada_Escolar_com_Reconhecimento_Facial
-#----------------------------------------------------------------------------
+# https://github.com/Alisson-tech/Chamada_Escolar_com_Reconhecimento_Facial
+# ----------------------------------------------------------------------------
 # PRÓXIMOS ITENS A ADICIONAR NO PROJETO
 # Disponibilizar a API de acesso ao banco de dados
 # fazer método e rota para disponibilizar logs para aplicação de gestão
 # Desenvolver logins de acesso a usuários.
-
 
 # importa as bibliotecas necessárias
 import cv2
@@ -34,6 +33,8 @@ import time
 import tkinter as tk
 import random
 import mysql.connector
+from tkcalendar import DateEntry
+import datetime
 
 # Configuração da conexão com o banco de dados
 config = {
@@ -44,26 +45,38 @@ config = {
     'raise_on_warnings': True
 }
 
-
 # função para inserir os dados do usuário na tabela do banco de dados
-def insert_into_database(name, email, phone, folder_image):
+def insert_into_database(nome, cpf, datanascimento, tipo, file_patch):
     # Conecta ao banco de dados
     connection = mysql.connector.connect(**config)
     cursor = connection.cursor()
 
     # Insere os dados na tabela (Substitua 'nome_da_tabela' pelo nome da sua tabela)
-    query = "INSERT INTO pessoa (name, cpf, data_nascimento, folder_image) VALUES (%s, %s, %s, %s)"
-    cursor.execute(query, (name, email, phone, folder_image))
-    #"INSERT INTO log (name, email, phone, folder_image) VALUES (%s, %s, %s, %s)"
+    query = "INSERT INTO pessoa (nome,cpf,datanascimento,tipo,file_patch) VALUES (%s, %s, %s, %s, %s)"
+    cursor.execute(query, (nome, cpf, datanascimento, tipo, file_patch))
+    # "INSERT INTO log (data, Pessoa_idPessoa, controlador_idcontrolador) VALUES (%s, %s, %s)"
     # Encerra a conexão+
     connection.commit()
     cursor.close()
     connection.close()
 
+def insert_into_log(data, pessoa_id, controlador_id):
+    # Conexão com o banco de dados
+    # Conecta ao banco de dados
+    connection = mysql.connector.connect(**config)
+    cursor = connection.cursor()
 
+    # Query SQL para inserir um registro na tabela log
+    sql = "INSERT INTO log (data, Pessoa_idPessoa, controlador_idcontrolador) VALUES (%s, %s, %s)"
+    val = (data, pessoa_id, controlador_id)
+
+    # cursor.execute(sql, val)
+    # Encerra a conexão+
+    connection.commit()
+    cursor.close()
+    connection.close()
 
 # 1 Função que cria a janela principal
-
 def lobby():
     try:
         # Cria uma janela
@@ -95,7 +108,7 @@ def lobby():
             "Arial Black", 10), bg="black", fg="white", cursor="hand2", command=admadd)
         Rmva_button = tk.Button(lobby_tk, text="- Adm", font=(
             "Arial Black", 10), bg="black", fg="red", cursor="hand2", command=admrvm)
-        #cjc_label = tk.Label(lobby_tk, text="By: Davicjc", font=(
+        # cjc_label = tk.Label(lobby_tk, text="By: Davicjc", font=(
         #    "arial", 8), bg="black", fg="blue", cursor="hand2")
 
         # Posiciona os componentes na janela
@@ -105,14 +118,8 @@ def lobby():
         Scan_button.place(x=10, y=200)
         Addadm_button.place(x=200, y=100)
         Rmva_button.place(x=200, y=150)
-        #cjc_label.place(x=255, y=220)
-        '''
-        # Serve para chamar a função "Davi" quando o botão for clicado
-        cjc_label.bind("<Button-1>", lambda event: Davi())
+        # cjc_label.place(x=255, y=220)
 
-        def Davi():
-            webbrowser.open("https://github.com/Davicjc/")
-        '''
         # Loop da janela
         lobby_tk.mainloop()
 
@@ -149,28 +156,39 @@ def capture_name():
         name_window.configure(background="black")
 
         def clear():
-            name = nm_entry.get()
-            email = email_entry.get()
-            phone = phone_entry.get()
-            if name == "":
-                #adicionar tratamento para "Não inseriu nome"
-                name = "NoName " + str(random.randint(1, 1000)) + ".jpg"
+            nome = nm_entry.get()
+            nome_bd = nm_entry.get()
+            cpf = cpf_entry.get()
+            datanascimento = datanascimento_entry.get()
+            tipo = tipo_entry.get()
+
+            if nome == "":
+                # adicionar tratamento para "Não inseriu nome"
+                nome = "NoName " + ".jpg"
             else:
-                name = name + "_" + str(random.randint(1, 1000)) + ".jpg"
+                nome = nome + ".jpg"
             name_window.destroy()
-            nova_imagem(name, email, phone)
 
-
+            #chama função para capturar imagem do usuário
+            nova_imagem(nome_bd, nome, cpf, datanascimento, tipo)
 
         # Componentes da janela
         nm_label = tk.Label(name_window, text="Nome:", bg="black", fg="white")
         nm_entry = tk.Entry(name_window, width=40)
 
-        email_label = tk.Label(name_window, text="CPF:", bg="black", fg="white")
-        email_entry = tk.Entry(name_window, width=40)
+        cpf_label = tk.Label(name_window, text="CPF:", bg="black", fg="white")
+        cpf_entry = tk.Entry(name_window, width=40)
 
-        phone_label = tk.Label(name_window, text="Data de Nascimento:", bg="black", fg="white")
-        phone_entry = tk.Entry(name_window, width=40)
+        # Format the selected date as 'YYYY-MM-DD'
+        datanascimento_label = tk.Label(name_window, text="Data de Nascimento:", bg="black", fg="white")
+        datanascimento_entry = DateEntry(name_window, width=12, background='darkblue', foreground='white',
+                                         borderwidth=2, date_pattern='dd/mm/yyyy')
+        '''
+        datanascimento_label = tk.Label(name_window, text="Data de Nascimento:", bg="black", fg="white")
+        datanascimento_entry = tk.Entry(name_window, width=40)
+        '''
+        tipo_label = tk.Label(name_window, text="Tipo:", bg="black", fg="white")
+        tipo_entry = tk.Entry(name_window, width=40)
 
         nm_button = tk.Button(name_window, text="OK", font=("Arial", 9), bg="black", fg="white", cursor="hand2",
                               command=clear)
@@ -179,11 +197,14 @@ def capture_name():
         nm_label.place(x=5, y=5)
         nm_entry.place(x=5, y=25)
 
-        email_label.place(x=5, y=55)
-        email_entry.place(x=5, y=75)
+        cpf_label.place(x=5, y=55)
+        cpf_entry.place(x=5, y=75)
 
-        phone_label.place(x=5, y=105)
-        phone_entry.place(x=5, y=125)
+        datanascimento_label.place(x=5, y=105)
+        datanascimento_entry.place(x=5, y=125)
+
+        tipo_label.place(x=5, y=155)
+        tipo_entry.place(x=5, y=175)
 
         nm_button.place(x=260, y=5)
 
@@ -212,76 +233,24 @@ def capture_name():
         dica_label.place(x=10, y=100)
         error.mainloop()
 
-
 # 2 Função que captura o nome da pessoa
-'''
-def nome():
-    try:
-        # Cria uma janela
-        nome = tk.Tk()
-
-        # Bloqueia o redimensionamento da janela
-        nome.resizable(width=False, height=False)
-
-        # Define o título da janela
-        nome.title("Seu Nome:")
-
-        # Define o tamanho da janela
-        nome.geometry("290x60")
-
-        # Define a cor de fundo da janela
-        nome.configure(background="black")
-
-        # Chama a função que captura a imagem e apaga os componentes da janela "nome()"
-        def clear():
-            namep = nm_entry.get()
-            if namep == "":
-                name = "NoName " + str(random.randint(1, 1000)) + ".jpg"
-            else:
-                name = namep + " " + str(random.randint(1, 10)) + ".jpg"
-            nome.destroy()
-            nova_imagem(name)
-
-        # Define os componentes da janela
-        nm_entry = tk.Entry(nome, width=40)
-        nm_button = tk.Button(nome, text="OK", font=(
-            "Arial", 9), bg="black", fg="white", cursor="hand2", command=clear)
-        recado_label = tk.Label(nome, text="As fotos serão armazenadas na área de trabalho!", font=(
-            "Arial", 9), bg="black", fg="red")
-
-        # Posiciona os componentes na janela
-        nm_entry.place(x=5, y=8)
-        nm_button.place(x=260, y=5)
-        recado_label.place(x=5, y=37)
-
-        # Loop da janela
-        nome.mainloop()
-
-    # Caso ocorra algum erro, exibe uma mensagem de erro
-    except:
-        def close():
-            error.destroy()
-        print("Ocorreu um erro 'code-2'")
-        error = tk.Tk()
-        error.resizable(width=False, height=False)
-        error.title("Erro 2")
-        error.geometry("320x180")
-        error.configure(background="red")
-        error_label = tk.Label(error, text="Erro em:\nNome '2'", font=(
-            "Arial", 30), bg="red", fg="black")
-        error_label.pack()
-        botao = tk.Button(error, text="OK", font=(
-            "Arial Black", 10), bg="red", fg="black", cursor="hand2", command=close)
-        botao.place(x=10, y=140)
-        dica_label = tk.Label(error, text="Erro em: Capturar o nome da pessoa\nDica: Nome invalido ou ERRO!", font=(
-            "Arial", 10), bg="red", fg="black")
-        dica_label.place(x=10, y=100)
-        error.mainloop() '''
-
-
+def close_window(window):
+    window.destroy()
 # 3 Função que captura a imagem da câmera com o nome da pessoa
+# Mostra o nome da pessoa salvo
+def nameinfo(nome):
+    window = tk.Tk()
+    window.resizable(width=False, height=False)
+    window.title("Nome da Pessoa:")
+    window.geometry("290x30")
+    window.configure(background="black")
+    label = tk.Label(window, text="Nome: " + nome + " Salvo!", font=("Arial", 9), bg="black", fg="white")
+    label.place(x=5, y=8)
+    button = tk.Button(window, text="OK", font=("Arial", 9), bg="black", fg="white", cursor="hand2", command=lambda: close_window(window))
+    button.place(x=260, y=5)
+    window.mainloop()
 
-def nova_imagem(name, email, phone):
+def nova_imagem(nome_bd, nome, cpf, datanascimento, tipo):
     try:
         # Define o nome da pasta onde as fotos serão salvas
         folder_name = "Fotos Data 'Face Safety'"
@@ -296,7 +265,17 @@ def nova_imagem(name, email, phone):
             os.makedirs(folder_path)
 
         # Captura a imagem da câmera
-        cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+        cap = cv2.VideoCapture(1, cv2.CAP_DSHOW)
+
+        # Define o tamanho da janela
+        cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+
+        # Define a resolução da câmera
+        cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*"MJPG"))
+
+        # Define a taxa de quadros da câmera
+        cap.set(cv2.CAP_PROP_FPS, 60)
 
         # Aguarda o usuário apertar qualquer tecla para tirar a sua foto
         while True:
@@ -306,33 +285,23 @@ def nova_imagem(name, email, phone):
                 break
 
         # Salva a imagem capturada na pasta criada
-        file_path = os.path.join(folder_path, name)
+        file_path = os.path.join(folder_path, nome)
         cv2.imwrite(file_path, frame)
-        #filipe colocou chama função insert no banco
-        insert_into_database(name, email, phone, file_path)
-        #teste
-        # Mostra o nome da pessoa salvo
-        def nameinfo():
-            def fechar():
-                nameinfo.destroy()
+        # filipe colocou chama função insert no banco
 
-            cap.release()
-            cv2.destroyAllWindows()
-            nameinfo = tk.Tk()
-            nameinfo.resizable(width=False, height=False)
-            nameinfo.title("Nome da Pessoa:")
-            nameinfo.geometry("290x30")
-            nameinfo.configure(background="black")
-            nameinfo_label = tk.Label(nameinfo, text="Nome: " + name + " Salvo!", font=(
-                "Arial", 9), bg="black", fg="white")
-            nameinfo_label.place(x=5, y=8)
-            nameinfo_button = tk.Button(nameinfo, text="OK", font=(
-                "Arial", 9), bg="black", fg="white", cursor="hand2", command=fechar)
-            nameinfo_button.place(x=260, y=5)
-            nameinfo.mainloop()
+        # Convert Brazilian date format (DD/MM/YYYY) to Python date object
+        datanascimento = datetime.datetime.strptime(datanascimento, '%d/%m/%Y').date()
 
-        nameinfo()
+        # Convert date to desired database format (YYYY-MM-DD)
+        datanascimento_db = datanascimento.strftime('%Y-%m-%d')
+        print(nome)
+        print(cpf)
+        print(datanascimento)
+        print(tipo)
+        print(file_path)
 
+        insert_into_database(nome_bd, cpf, datanascimento_db, tipo, file_path)
+        nameinfo(nome_bd)
 
 
     # Caso ocorra algum erro, exibe uma mensagem de erro
@@ -895,6 +864,17 @@ class PastaOrganizador:
                 # Se a correspondência for encontrada, atribui o nome correspondente à face
                 if matches[best_match_index]:
                     name = self.known_face_names[best_match_index]
+                    # função adicionada para salvar no log por prof Filipe
+                    # Get the current date and time
+                    data_atual = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+                    # Replace 'id_da_pessoa' and 'id_do_controlador' with the actual IDs
+                    id_da_pessoa = 'your_actual_id_da_pessoa'
+                    id_do_controlador = 'your_actual_id_do_controlador'
+                    print('dados logs')
+                    print(data_atual)
+                    print(name)
+                    insert_into_log(data_atual, 'id_da_pessoa', 'id_do_controlador')
 
                 # Adiciona o nome da face à lista de nomes de faces
                 face_names.append(name)
