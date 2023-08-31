@@ -108,9 +108,7 @@ def lobby():
             "Arial Black", 10), bg="black", fg="white", cursor="hand2", command=admadd)
         Rmva_button = tk.Button(lobby_tk, text="- Adm", font=(
             "Arial Black", 10), bg="black", fg="red", cursor="hand2", command=admrvm)
-        # cjc_label = tk.Label(lobby_tk, text="By: Davicjc", font=(
-        #    "arial", 8), bg="black", fg="blue", cursor="hand2")
-
+        
         # Posiciona os componentes na janela
         txt_label.pack()
         Badd_button.place(x=10, y=100)
@@ -144,7 +142,6 @@ def lobby():
             "Arial", 10), bg="red", fg="black")
         dica_label.place(x=10, y=100)
         error.mainloop()
-
 
 # 2 Função modificada que capturas os dados do usuário e salva no banco de dados.
 def capture_name():
@@ -300,7 +297,6 @@ def nova_imagem(nome_bd, nome, cpf, datanascimento, tipo):
         insert_into_database(nome_bd, cpf, datanascimento_db, tipo, file_path)
         nameinfo(nome_bd)
 
-
     # Caso ocorra algum erro, exibe uma mensagem de erro
     except:
         def close():
@@ -323,7 +319,6 @@ def nova_imagem(nome_bd, nome, cpf, datanascimento, tipo):
                                   "Arial", 10), bg="red", fg="black")
         dica_label.place(x=10, y=100)
         error.mainloop()
-
 
 # 4 Tira um nome da lista de ADM
 
@@ -455,7 +450,6 @@ def admrvm():
                                   "Arial", 10), bg="red", fg="black")
         dica_label.place(x=10, y=100)
         error.mainloop()
-
 
 # 5 Coloca um nome na lista de ADM
 
@@ -613,9 +607,7 @@ def admadd():
         dica_label.place(x=10, y=100)
         error.mainloop()
 
-
 # 6 Função que apaga a imagem da pessoa
-
 def apagar_imagem():
     try:
         # Cria uma janela
@@ -712,7 +704,6 @@ def apagar_imagem():
         dica_label.place(x=10, y=100)
         error.mainloop()
 
-
 # 7 Função que reconhece a pessoa
 def reconhecer():
     try:
@@ -777,9 +768,7 @@ def reconhecer():
         dica_label.place(x=10, y=100)
         error.mainloop()
 
-
 # 8 Função que reconhece a pessoa dentro de uma pasta
-
 class PastaOrganizador:
     try:
         # Método __init__ é definido, que inicializa os atributos da classe
@@ -905,7 +894,6 @@ class PastaOrganizador:
     except:
         pass
 
-
 # ___________________________________________________________________________
 # 9 Função que libera ou tranca o acesso, "Personalize ela como quiser"
 # Caso não saiba o que está fazendo, não altere nada fora da função "key()"
@@ -973,8 +961,6 @@ def key():
         dica_label.place(x=10, y=100)
         error.mainloop()
 
-
 # ___________________________________________________________________________
-
 
 lobby()
