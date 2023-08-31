@@ -259,17 +259,17 @@ def nova_imagem(nome_bd, nome, cpf, datanascimento, tipo):
             os.makedirs(folder_path)
 
         # Captura a imagem da câmera
-        cap = cv2.VideoCapture(1, cv2.CAP_DSHOW)
+        cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
 
-        # Define o tamanho da janela
+        '''# Define o tamanho da janela
         cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
-        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)'''
 
-        # Define a resolução da câmera
-        cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*"MJPG"))
+        '''# Define a resolução da câmera
+        cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*"MJPG"))'''
 
-        # Define a taxa de quadros da câmera
-        cap.set(cv2.CAP_PROP_FPS, 60)
+        '''# Define a taxa de quadros da câmera
+        cap.set(cv2.CAP_PROP_FPS, 60)'''
 
         # Aguarda o usuário apertar qualquer tecla para tirar a sua foto
         while True:
