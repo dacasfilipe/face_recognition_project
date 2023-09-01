@@ -60,17 +60,34 @@ def insert_into_database(nome, cpf, datanascimento, tipo, file_patch):
     cursor.close()
     connection.close()
 
-def insert_into_log(data, pessoa_id, controlador_id):
+def get_person_id_from_name(name):
+    connection = mysql.connector.connect(**config)
+    cursor = connection.cursor()
+    print("entrou no pega id pessoa")
+    # Query to retrieve the ID of the person based on their name
+    query = "SELECT idPessoa FROM pessoa WHERE nome = %s"
+    cursor.execute(query, (name,))
+    result = cursor.fetchone()
+    print("saiu do pega id pessoa")
+    cursor.close()
+    connection.close()
+
+    if result:
+        return result[0]  # Assuming 'id' is the first column in the query result
+
+    return None  # Return None if no match is found
+
+def insert_into_log(data, pessoa_id):
     # Conexão com o banco de dados
     # Conecta ao banco de dados
     connection = mysql.connector.connect(**config)
     cursor = connection.cursor()
 
     # Query SQL para inserir um registro na tabela log
-    sql = "INSERT INTO log (data, Pessoa_idPessoa, controlador_idcontrolador) VALUES (%s, %s, %s)"
-    val = (data, pessoa_id, controlador_id)
+    sql = "INSERT INTO log (data, Pessoa_idPessoa) VALUES (%s, %s)"
+    val = (data, pessoa_id)
 
-    # cursor.execute(sql, val)
+    cursor.execute(sql, val)
     # Encerra a conexão+
     connection.commit()
     cursor.close()
@@ -116,7 +133,6 @@ def lobby():
         Scan_button.place(x=10, y=200)
         Addadm_button.place(x=200, y=100)
         Rmva_button.place(x=200, y=150)
-        # cjc_label.place(x=255, y=220)
 
         # Loop da janela
         lobby_tk.mainloop()
@@ -705,12 +721,13 @@ def apagar_imagem():
         error.mainloop()
 
 # 7 Função que reconhece a pessoa
-def reconhecer():
+'''def reconhecer():
     try:
+        print('entrou reconhecer')
         # Obtém o caminho para a área de trabalho do usuário atual
         desktop_path = os.path.join(os.path.join(
             os.environ['USERPROFILE']), 'Desktop')
-
+        print('1')
         # Concatena o caminho da pasta "Fotos Data 'Face Safety'" na área de trabalho
         data_folder_path = os.path.join(desktop_path, "Fotos Data 'Face Safety'")
 
@@ -727,12 +744,22 @@ def reconhecer():
         while True:
             ret, frame = cap.read()
             face_locations, face_names = sfr.detect_known_faces(frame)
-
+            print('2')
             for face_loc, name in zip(face_locations, face_names):
                 y1, x2, y2, x1 = face_loc[0], face_loc[1], face_loc[2], face_loc[3]
                 cv2.putText(frame, name, (x1, y1 - 10),
                             cv2.FONT_HERSHEY_DUPLEX, 1, (0, 0, 200), 2)
                 cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 200), 4)
+                print('3')
+                # Get the current date and time
+                current_datetime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+                # Get the ID of the recognized person based on their name
+                print("nome da pessoa reconhecida",name)
+                recognized_person_id = get_person_id_from_name(name)  # You need to implement this function
+                print(current_datetime)
+                print(recognized_person_id)
+                insert_into_log(current_datetime, recognized_person_id)
 
             cv2.imshow("Aperte 'ESC' para sair do modo Scanner", frame)
 
@@ -766,7 +793,68 @@ def reconhecer():
                               font=(
                                   "Arial", 10), bg="red", fg="black")
         dica_label.place(x=10, y=100)
-        error.mainloop()
+        error.mainloop()'''
+
+
+def reconhecer():
+    try:
+        # Obtém o caminho para a área de trabalho do usuário atual
+        desktop_path = os.path.join(os.path.join(
+            os.environ['USERPROFILE']), 'Desktop')
+
+        # Concatena o caminho da pasta "Fotos Data 'Face Safety'" na área de trabalho
+        data_folder_path = os.path.join(desktop_path, "Fotos Data 'Face Safety'")
+
+        # Cria um objeto PastaOrganizador
+        sfr = PastaOrganizador()
+
+        # Carrega as imagens codificadas de faces conhecidas
+        sfr.load_encoding_images(data_folder_path)
+
+        # Resto do código é igual ao anterior
+        cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+
+        # Detecta as faces e as compara com as faces conhecidas
+        while True:
+            ret, frame = cap.read()
+            face_locations, face_names = sfr.detect_known_faces(frame)
+
+            for face_loc, name in zip(face_locations, face_names):
+                try:
+                    y1, x2, y2, x1 = face_loc[0], face_loc[1], face_loc[2], face_loc[3]
+                    cv2.putText(frame, name, (x1, y1 - 10),
+                                cv2.FONT_HERSHEY_DUPLEX, 1, (0, 0, 200), 2)
+                    cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 200), 4)
+
+                    # Get the current date and time
+                    current_datetime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+                    # Get the ID of the recognized person based on their name
+                    recognized_person_id = get_person_id_from_name(name)  # You need to implement this function
+                    print("Nome da pessoa reconhecida:", name)
+                    print("Data e hora atual:", current_datetime)
+                    print("ID da pessoa:", recognized_person_id)
+
+                    insert_into_log(current_datetime, recognized_person_id)
+                except Exception as e:
+                    print("Error processing a frame:", str(e))
+
+            cv2.imshow("Aperte 'ESC' para sair do modo Scanner", frame)
+
+            # Pressione 'ESC' para sair do modo Scanner
+            key = cv2.waitKey(1)
+
+            if key == 27:
+                break
+
+        # Fecha a janela
+        cap.release()
+        cv2.destroyAllWindows()
+
+    except cv2.error as cv2_error:
+        print("OpenCV Error:", cv2_error)
+    except Exception as e:
+        print("An error occurred:", str(e))
 
 # 8 Função que reconhece a pessoa dentro de uma pasta
 class PastaOrganizador:
@@ -860,7 +948,7 @@ class PastaOrganizador:
                     print('dados logs')
                     print(data_atual)
                     print(name)
-                    insert_into_log(data_atual, 'id_da_pessoa', 'id_do_controlador')
+                    #insert_into_log(data_atual, 'id_da_pessoa')
 
                 # Adiciona o nome da face à lista de nomes de faces
                 face_names.append(name)
@@ -939,7 +1027,6 @@ def key():
     # ___________________________________________________________________________________________________________________________
     # PARTE NAO EDITAVEL DO CODIGO, NAO ALTERE NADA ABAIXO
     # V V V V V V V V V V V V V V V V V V V V V V V V V
-
     except:
         def close():
             error.destroy()
