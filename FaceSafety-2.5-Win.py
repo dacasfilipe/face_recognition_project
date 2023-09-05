@@ -721,13 +721,21 @@ def apagar_imagem():
         error.mainloop()
 
 # 7 Função que reconhece a pessoa
-'''def reconhecer():
+import time
+
+def reconhecer():
+    # Initialize a dictionary to store the detected people
+    detected_people = {}
+
+    # Initialize a timer to restart the dictionary every minute
+    timer = time.time()
+
     try:
-        print('entrou reconhecer')
+        # ...
         # Obtém o caminho para a área de trabalho do usuário atual
         desktop_path = os.path.join(os.path.join(
             os.environ['USERPROFILE']), 'Desktop')
-        print('1')
+
         # Concatena o caminho da pasta "Fotos Data 'Face Safety'" na área de trabalho
         data_folder_path = os.path.join(desktop_path, "Fotos Data 'Face Safety'")
 
@@ -740,26 +748,38 @@ def apagar_imagem():
         # Resto do código é igual ao anterior
         cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
 
-        # Detecta as faces e as compara com as faces conhecidas
+        # Detect the faces and compare them to the known faces
         while True:
             ret, frame = cap.read()
             face_locations, face_names = sfr.detect_known_faces(frame)
-            print('2')
-            for face_loc, name in zip(face_locations, face_names):
-                y1, x2, y2, x1 = face_loc[0], face_loc[1], face_loc[2], face_loc[3]
-                cv2.putText(frame, name, (x1, y1 - 10),
-                            cv2.FONT_HERSHEY_DUPLEX, 1, (0, 0, 200), 2)
-                cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 200), 4)
-                print('3')
-                # Get the current date and time
-                current_datetime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-                # Get the ID of the recognized person based on their name
-                print("nome da pessoa reconhecida",name)
-                recognized_person_id = get_person_id_from_name(name)  # You need to implement this function
-                print(current_datetime)
-                print(recognized_person_id)
-                insert_into_log(current_datetime, recognized_person_id)
+            for face_loc, name in zip(face_locations, face_names):
+                try:
+                    y1, x2, y2, x1 = face_loc[0], face_loc[1], face_loc[2], face_loc[3]
+                    cv2.putText(frame, name, (x1, y1 - 10),
+                                cv2.FONT_HERSHEY_DUPLEX, 1, (0, 0, 200), 2)
+                    cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 200), 4)
+
+                    # Get the current date and time
+                    current_datetime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+                    # Get the ID of the recognized person based on their name
+                    recognized_person_id = get_person_id_from_name(name)  # You need to implement this function
+
+                    # Check if the person has already been detected
+                    if name not in detected_people:
+                        # Save the log and add the person to the dictionary
+                        insert_into_log(current_datetime, recognized_person_id)
+                        detected_people[name] = True
+
+                except Exception as e:
+                    print("Error processing a frame:", str(e))
+
+            # Check if the timer has expired
+            if time.time() - timer >= 60:
+                # Reset the dictionary
+                detected_people = {}
+                timer = time.time()
 
             cv2.imshow("Aperte 'ESC' para sair do modo Scanner", frame)
 
@@ -772,30 +792,14 @@ def apagar_imagem():
         # Fecha a janela
         cap.release()
         cv2.destroyAllWindows()
-    except:
-        def close():
-            error.destroy()
 
-        print("Ocorreu um erro 'code-7'")
-        error = tk.Tk()
-        error.resizable(width=False, height=False)
-        error.title("Erro 7")
-        error.geometry("320x180")
-        error.configure(background="red")
-        error_label = tk.Label(error, text="Erro em:\nReconhecer '7'", font=(
-            "Arial", 30), bg="red", fg="black")
-        error_label.pack()
-        botao = tk.Button(error, text="OK", font=(
-            "Arial Black", 10), bg="red", fg="black", cursor="hand2", command=close)
-        botao.place(x=10, y=140)
-        dica_label = tk.Label(error,
-                              text="Erro em: Reconhece a pessoa\nDica: Veja se há cadastros/alguma foto desfocada!",
-                              font=(
-                                  "Arial", 10), bg="red", fg="black")
-        dica_label.place(x=10, y=100)
-        error.mainloop()'''
+    except cv2.error as cv2_error:
+        print("OpenCV Error:", cv2_error)
+    except Exception as e:
+        print("An error occurred:", str(e))
 
 
+'''
 def reconhecer():
     try:
         # Obtém o caminho para a área de trabalho do usuário atual
@@ -854,7 +858,7 @@ def reconhecer():
     except cv2.error as cv2_error:
         print("OpenCV Error:", cv2_error)
     except Exception as e:
-        print("An error occurred:", str(e))
+        print("An error occurred:", str(e))'''
 
 # 8 Função que reconhece a pessoa dentro de uma pasta
 class PastaOrganizador:
@@ -942,13 +946,9 @@ class PastaOrganizador:
                     # Get the current date and time
                     data_atual = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-                    # Replace 'id_da_pessoa' and 'id_do_controlador' with the actual IDs
-                    id_da_pessoa = 'your_actual_id_da_pessoa'
-                    id_do_controlador = 'your_actual_id_do_controlador'
                     print('dados logs')
                     print(data_atual)
                     print(name)
-                    #insert_into_log(data_atual, 'id_da_pessoa')
 
                 # Adiciona o nome da face à lista de nomes de faces
                 face_names.append(name)
