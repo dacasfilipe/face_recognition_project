@@ -11,18 +11,8 @@
 - ["🔬Como usar"](https://github.com/Davicjc/Face-Safety#como-usar) (Aprenda a usar o programa com todos os detalhes)
 - ["🗝️Função KEY"](https://github.com/Davicjc/Face-Safety#%EF%B8%8Ffun%C3%A7%C3%A3o-key) (Essa parte permite gerenciar sistemas como portas eletrônicas e sistemas de monitoramento, podendo ser utilizado em um Raspberry Pi ou qualquer outro lugar onde o código seja compatível. Você pode adicionar administradores e executar ações personalizadas quando um administrador é reconhecido pela câmera)
 
-### Contato:
- - E-mail: [davicjc@gmail.com]() "Mais utilizado"
- - Telegram: [@Davicjc](https://t.me/Davicjc)
+### Esse projeto foi alterado e teve como base o projeto do - E-mail: [davicjc@gmail.com]() 
 
-# 🪄 Executar 1 Clique:
-
-- 📢 "Apenas para Windows por ser um '.exe'"
-- Clique aqui: ["BAIXAR"](https://1drv.ms/u/s!AnmOlIL4SXyggoBBImepRALWGBEUfA?e=P84JPt)
-- Essa versão não precisa de nenhum passo para executar, é só baixar e abrir!
-- "Lembrando que essa versão não é possível usar a função "KEY" editável, pois não é possível editar o código, porém tudo funciona.
-- Caso aconteça algum erro, o que é bem raro, execute esse codigo no cmd: ```pip install dlib && pip install face_recognition && pip install numpy && pip install opencv-python``` e tente novamente!
-- "Obrigatório câmera! Lembrando que, dependendo do PC, ao abrir, pode demorar um pouco para ser executado 100%".
 
 # ⬇️Como Baixar:
 
